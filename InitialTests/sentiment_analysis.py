@@ -9,7 +9,7 @@ load_dotenv()
 # --- SETUP ---
 # either export your key first (in terminal: export OPENAI_API_KEY="sk-...")
 # or paste directly below (not recommended for public sharing)
-client = OpenAI(api_key="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")
+client = OpenAI(api_key="blank")
 
 # --- LOAD CLEANED DATA ---
 df = pd.read_csv("reddit_robotic_surgery_clean.csv")
