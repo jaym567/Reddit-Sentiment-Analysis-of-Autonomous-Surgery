@@ -1,7 +1,7 @@
 import json
 import pandas as pd
 
-with open("reddit_robotic_surgery_sentiment.json", "r", encoding="utf-8") as f:
+with open("reddit_robotic_surgery_aspect_sentiment.json", "r", encoding="utf-8") as f:
     data = json.load(f)
 
 rows = []
@@ -40,4 +40,4 @@ df = pd.DataFrame(rows)
 print(df.head())
 print(df["sentiment_label"].value_counts())
 
-df.to_csv("reddit_sentiment_flat.csv", index=False)
+df.to_csv("aspect_reddit_sentiment_flat.csv", index=False)

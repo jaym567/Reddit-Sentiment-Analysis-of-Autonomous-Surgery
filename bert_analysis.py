@@ -44,4 +44,44 @@ def inject_sentiment(data, sentiment_results):
 
 if __name__ == "__main__":
     with open("reddit_robotic_surgery.json", "r", encoding="utf-8") as f:
-        reddit_dat_
+        reddit_data = json.load(f)
+
+    sentiment_model = pipeline(
+        "sentiment-analysis",
+        model="cardiffnlp/twitter-roberta-base-sentiment-latest",
+        truncation=True
+    )
+
+    texts = extract_texts(reddit_data)
+
+    for item in texts:
+        text = item["text"]
+
+        if not text:
+            item["sentiment"] = None
+            continue
+
+        result = sentiment_model(
+            text,
+            max_length=512,
+            truncation=True
+        )[0]
+
+        label = result["label"].upper()
+        score = float(result["score"])
+
+        # Optional: collapse low-confidence predictions into MIXED
+        if score < 0.6:
+            label = "MIXED"
+
+        item["sentiment"] = {
+            "label": label,
+            "confidence": score
+        }
+
+    annotated_data = inject_sentiment(reddit_data, texts)
+
+    with open("reddit_robotic_surgery_sentiment_improved.json", "w", encoding="utf-8") as f:
+        json.dump(annotated_data, f, indent=2)
+
+    print("Improved sentiment analysis complete.")
