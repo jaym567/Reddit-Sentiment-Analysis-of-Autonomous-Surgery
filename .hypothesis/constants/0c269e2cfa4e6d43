@@ -1,0 +1,4 @@
+# file: C:\Users\jaymo\OneDrive\Desktop\ARGOS\Sentiment Analysis of Autonomous Surgery\SentimentCode\relevance_filter\comment_evaluator.py
+# hypothesis_version: 6.150.2
+
+[0.7, 0.9, 'body', 'comment', 'concatenated', 'contextual', 'depth', 'id', 'inherited', 'keyword', 'link_id', 'local', 'parent_id', 'post_id', 'relevance_reason', 'relevance_score', 'relevance_state', 'semantic', 'should_prune', 'text', 'type', 'value']

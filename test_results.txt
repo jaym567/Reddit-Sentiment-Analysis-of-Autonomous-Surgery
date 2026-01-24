@@ -1,0 +1,196 @@
+============================= test session starts =============================
+platform win32 -- Python 3.10.19, pytest-9.0.2, pluggy-1.6.0
+rootdir: C:\Users\jaymo\OneDrive\Desktop\ARGOS\Sentiment Analysis of Autonomous Surgery\SentimentCode
+plugins: anyio-4.12.1, dash-3.3.0, hypothesis-6.150.2
+collected 3 items
+
+relevance_filter\tests\test_comment_evaluator_properties.py FFF          [100%]
+
+================================== FAILURES ===================================
+__ TestCommentEvaluatorProperties.test_context_inheritance_for_continuations __
+
+self = <relevance_filter.tests.test_comment_evaluator_properties.TestCommentEvaluatorProperties object at 0x000001F7A5FEF1C0>
+
+    @given(
+>       st.text(min_size=1, max_size=1000),
+        st.sampled_from([RelevanceState.RELEVANT_STRONG, RelevanceState.RELEVANT_INHERITED])
+    )
+
+relevance_filter\tests\test_comment_evaluator_properties.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+relevance_filter\tests\test_comment_evaluator_properties.py:54: in test_context_inheritance_for_continuations
+    result = evaluator.evaluate(comment, parent_ctx, 1)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <relevance_filter.comment_evaluator.CommentEvaluator object at 0x000001F7A5F679A0>
+comment = {'body': '0 because I believe this affects clinical outcomes.', 'id': 'c1', 'parent_id': 'p1'}
+parent_context = ParentContext(id='p1', text='Robotic surgery is great.', relevance_state=<RelevanceState.RELEVANT_STRONG: 'RELEVANT_STRONG'>, relevance_score=0.9, depth=0, post_id='post1')
+depth = 1
+
+    def evaluate(
+        self,
+        comment: Dict,
+        parent_context: Optional[ParentContext],
+        depth: int
+    ) -> Dict:
+        """
+        Evaluate a single comment and return enriched result.
+    
+        Args:
+            comment: Comment dictionary
+            parent_context: Context from parent comment/post
+            depth: Depth of this comment in the tree
+    
+        Returns:
+            Dictionary with evaluation results including:
+            - id, type, text, parent_id, post_id, depth
+            - relevance_score, relevance_reason, relevance_state
+            - should_prune, has_analytical_content
+        """
+        text = comment.get('body', '')
+        if not text:
+            # Handle possible alternate field names
+            text = comment.get('text', '')
+    
+        # Step 1: Decision on classification mode
+        mode = self._determine_classification_mode(comment, parent_context)
+    
+        # Step 2: Semantic classification
+        if mode == "contextual" and parent_context:
+            relevance_state, score = self.semantic_classifier.classify_contextual(
+                parent_context.text,
+                text
+            )
+            reason = "concatenated"
+        else:
+            relevance_state, score = self.semantic_classifier.classify_local(text)
+            reason = "semantic"
+    
+        # Step 3: Keyword Recovery / Override (Requirement 3.5 & 9.1)
+        if self.keyword_filter.matches(text):
+            # Explicit keywords always signal strong relevance in this domain
+            relevance_state = RelevanceState.RELEVANT_STRONG
+            reason = "keyword"
+            score = max(score, 0.9) # High confidence for explicit target keywords
+    
+        # Step 4: Inheritance Logic (Requirement 3)
+        # Only apply inheritance if not already marked RELEVANT_STRONG
+>       if (relevance_state == RelevanceState.IRRELEVANT or relevance_state == RelevanceState.RELEVANT_WEAK) \
+           and parent_context \
+           and parent_context.relevance_state in [RelevanceState.RELEVANT_STRONG, RelevanceState.RELEVANT_INHERITED]:
+E          NameError: name 'RelevanceState' is not defined
+E          Falsifying example: test_context_inheritance_for_continuations(
+E              self=<relevance_filter.tests.test_comment_evaluator_properties.TestCommentEvaluatorProperties object at 0x000001F7A5FEF1C0>,
+E              child_text='0',
+E              parent_state=RelevanceState.RELEVANT_STRONG,
+E          )
+
+relevance_filter\comment_evaluator.py:93: NameError
+____ TestCommentEvaluatorProperties.test_recovery_from_irrelevant_parents _____
+
+self = <relevance_filter.tests.test_comment_evaluator_properties.TestCommentEvaluatorProperties object at 0x000001F7A5FED540>
+
+    @given(
+>       st.text(min_size=1, max_size=500),
+        st.sampled_from([RelevanceState.IRRELEVANT])
+    )
+
+relevance_filter\tests\test_comment_evaluator_properties.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+relevance_filter\tests\test_comment_evaluator_properties.py:85: in test_recovery_from_irrelevant_parents
+    result = evaluator.evaluate(comment, parent_ctx, 1)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <relevance_filter.comment_evaluator.CommentEvaluator object at 0x000001F7A5F679A0>
+comment = {'body': '0 autonomous surgery 0', 'id': 'c1', 'parent_id': 'p1'}
+parent_context = ParentContext(id='p1', text='I like pizza.', relevance_state=<RelevanceState.IRRELEVANT: 'IRRELEVANT'>, relevance_score=0.1, depth=0, post_id='post1')
+depth = 1
+
+    def evaluate(
+        self,
+        comment: Dict,
+        parent_context: Optional[ParentContext],
+        depth: int
+    ) -> Dict:
+        """
+        Evaluate a single comment and return enriched result.
+    
+        Args:
+            comment: Comment dictionary
+            parent_context: Context from parent comment/post
+            depth: Depth of this comment in the tree
+    
+        Returns:
+            Dictionary with evaluation results including:
+            - id, type, text, parent_id, post_id, depth
+            - relevance_score, relevance_reason, relevance_state
+            - should_prune, has_analytical_content
+        """
+        text = comment.get('body', '')
+        if not text:
+            # Handle possible alternate field names
+            text = comment.get('text', '')
+    
+        # Step 1: Decision on classification mode
+        mode = self._determine_classification_mode(comment, parent_context)
+    
+        # Step 2: Semantic classification
+        if mode == "contextual" and parent_context:
+            relevance_state, score = self.semantic_classifier.classify_contextual(
+                parent_context.text,
+                text
+            )
+            reason = "concatenated"
+        else:
+            relevance_state, score = self.semantic_classifier.classify_local(text)
+            reason = "semantic"
+    
+        # Step 3: Keyword Recovery / Override (Requirement 3.5 & 9.1)
+        if self.keyword_filter.matches(text):
+            # Explicit keywords always signal strong relevance in this domain
+>           relevance_state = RelevanceState.RELEVANT_STRONG
+E           NameError: name 'RelevanceState' is not defined
+E           Falsifying example: test_recovery_from_irrelevant_parents(
+E               self=<relevance_filter.tests.test_comment_evaluator_properties.TestCommentEvaluatorProperties object at 0x000001F7A5FED540>,
+E               noise_text='0',
+E               parent_state=RelevanceState.IRRELEVANT,
+E           )
+
+relevance_filter\comment_evaluator.py:87: NameError
+_________ TestCommentEvaluatorProperties.test_evaluation_completeness _________
+  + Exception Group Traceback (most recent call last):
+  |   File "C:\Users\jaymo\OneDrive\Desktop\ARGOS\Sentiment Analysis of Autonomous Surgery\SentimentCode\relevance_filter\tests\test_comment_evaluator_properties.py", line 92, in test_evaluation_completeness
+  |     st.text(max_size=1000),
+  |   File "C:\Users\jaymo\anaconda3\envs\myoconverter\lib\site-packages\hypothesis\core.py", line 2246, in wrapped_test
+  |     raise the_error_hypothesis_found
+  | exceptiongroup.ExceptionGroup: Hypothesis found 2 distinct failures. (2 sub-exceptions)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "C:\Users\jaymo\OneDrive\Desktop\ARGOS\Sentiment Analysis of Autonomous Surgery\SentimentCode\relevance_filter\tests\test_comment_evaluator_properties.py", line 107, in test_evaluation_completeness
+    |     result = evaluator.evaluate(comment, parent_ctx, (parent_ctx.depth + 1) if parent_ctx else 1)
+    |   File "C:\Users\jaymo\OneDrive\Desktop\ARGOS\Sentiment Analysis of Autonomous Surgery\SentimentCode\relevance_filter\comment_evaluator.py", line 87, in evaluate
+    |     relevance_state = RelevanceState.RELEVANT_STRONG
+    | NameError: name 'RelevanceState' is not defined. Did you mean: 'relevance_state'?
+    | Falsifying example: test_evaluation_completeness(
+    |     self=<relevance_filter.tests.test_comment_evaluator_properties.TestCommentEvaluatorProperties object at 0x000001F7A5FEDEA0>,
+    |     body='hysterectomy',
+    |     parent_ctx=None,
+    | )
+    +---------------- 2 ----------------
+    | Traceback (most recent call last):
+    |   File "C:\Users\jaymo\OneDrive\Desktop\ARGOS\Sentiment Analysis of Autonomous Surgery\SentimentCode\relevance_filter\tests\test_comment_evaluator_properties.py", line 107, in test_evaluation_completeness
+    |     result = evaluator.evaluate(comment, parent_ctx, (parent_ctx.depth + 1) if parent_ctx else 1)
+    |   File "C:\Users\jaymo\OneDrive\Desktop\ARGOS\Sentiment Analysis of Autonomous Surgery\SentimentCode\relevance_filter\comment_evaluator.py", line 93, in evaluate
+    |     if (relevance_state == RelevanceState.IRRELEVANT or relevance_state == RelevanceState.RELEVANT_WEAK) \
+    | NameError: name 'RelevanceState' is not defined. Did you mean: 'relevance_state'?
+    | Falsifying example: test_evaluation_completeness(
+    |     self=<relevance_filter.tests.test_comment_evaluator_properties.TestCommentEvaluatorProperties object at 0x000001F7A5FEDEA0>,
+    |     body='',
+    |     parent_ctx=None,
+    | )
+    +------------------------------------
+=========================== short test summary info ===========================
+FAILED relevance_filter/tests/test_comment_evaluator_properties.py::TestCommentEvaluatorProperties::test_context_inheritance_for_continuations
+FAILED relevance_filter/tests/test_comment_evaluator_properties.py::TestCommentEvaluatorProperties::test_recovery_from_irrelevant_parents
+FAILED relevance_filter/tests/test_comment_evaluator_properties.py::TestCommentEvaluatorProperties::test_evaluation_completeness
+============================== 3 failed in 7.42s ==============================

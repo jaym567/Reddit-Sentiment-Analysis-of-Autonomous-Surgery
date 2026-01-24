@@ -1,0 +1,4 @@
+# file: C:\Users\jaymo\OneDrive\Desktop\ARGOS\Sentiment Analysis of Autonomous Surgery\SentimentCode\relevance_filter\concatenation_decider.py
+# hypothesis_version: 6.150.2
+
+['\\b', 'by the way', 'changing subject', 'different topic', 'it', 'off topic', 'speaking of', 'that', 'these', 'they', 'this', 'those', 'unrelated']

@@ -1,0 +1,4 @@
+# file: C:\Users\jaymo\OneDrive\Desktop\ARGOS\Sentiment Analysis of Autonomous Surgery\SentimentCode\relevance_filter\analytical_content_detector.py
+# hypothesis_version: 6.150.2
+
+['\\b', 'appears', 'as a result', 'assume', 'because', 'believe', 'causal_markers', 'clinical trial', 'consequently', 'domain_terms', 'efficacy', 'epistemic_verbs', 'error rate', 'fda', 'hence', 'indicate', 'liability', 'likely', 'malpractice', 'outcomes', 'patient', 'precision', 'probably', 'safety', 'seems', 'so that', 'suggest', 'surgeon', 'therefore', 'think', 'this means', 'thus', 'training data', 'would worry']

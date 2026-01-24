@@ -1,0 +1,4 @@
+# file: C:\Users\jaymo\OneDrive\Desktop\ARGOS\Sentiment Analysis of Autonomous Surgery\SentimentCode\relevance_filter\semantic_classifier.py
+# hypothesis_version: 6.150.2
+
+[0.0, 1e-09, 0.5, 0.6, 0.8, 1.0, 'embedding']
